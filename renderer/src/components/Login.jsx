@@ -6,8 +6,26 @@ const Login = ({ onLogin, error }) => {
     <div className="flex flex-col items-center justify-center min-h-screen p-4 text-center">
       <div className="max-w-md w-full glass p-8 rounded-2xl shadow-xl space-y-8 fade-in">
         <div className="flex justify-center mb-6">
-          <div className="p-4 rounded-full" style={{ backgroundColor: 'rgba(88, 166, 255, 0.1)' }}>
-            <Github size={64} className="text-github-blue" />
+          <div 
+            className="rounded-full flex items-center justify-center"
+            style={{ 
+              width: '96px', 
+              height: '96px', 
+              overflow: 'hidden', 
+              backgroundColor: 'rgba(88, 166, 255, 0.05)',
+              border: '2px solid rgba(88, 166, 255, 0.2)'
+            }}
+          >
+            <img 
+              src="/logo.png" 
+              alt="GitPulse Logo" 
+              style={{ 
+                width: '100%', 
+                height: '100%', 
+                objectFit: 'cover',
+                transform: 'scale(1.35)'
+              }}
+            />
           </div>
         </div>
         

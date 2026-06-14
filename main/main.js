@@ -26,6 +26,9 @@ function createWindow() {
       nodeIntegration: false,
     },
     title: "GitPulse",
+    icon: isDev
+      ? path.join(__dirname, '../renderer/public/logo.png')
+      : path.join(__dirname, '../renderer/dist/logo.png'),
     backgroundColor: '#0d1117',
     show: false,
   });
