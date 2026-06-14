@@ -56,7 +56,18 @@
       "store/**/*",
       ".env",
       "renderer/dist/**/*",
-      "package.json"
+      "package.json",
+      "!.env.local",
+      "!.env.development.local",
+      "!.env.test.local",
+      "!.env.production.local",
+      "!store/**/*.json",
+      "!**/cache",
+      "!**/session",
+      "!**/sessions",
+      "!**/.cache",
+      "!**/.sessions",
+      "!**/*.log"
     ]
   }
 }
