@@ -94,23 +94,152 @@ function CandidateRow({ report, onOpen }) {
 function EmptyDashboard({ userData, onBulk, onSingle }) {
   const name = userData?.name?.split(' ')[0] || userData?.login || 'there';
   return (
-    <div className="dash-empty">
-      <div className="dash-empty-icon">
-        <Users size={32} />
+    <div className="dash-welcome-onboarding" style={{
+      maxWidth: '1000px',
+      margin: '2rem auto',
+      animation: 'fadeInUp 0.45s ease-out'
+    }}>
+      {/* Welcome Hero Banner */}
+      <div className="onboarding-hero" style={{
+        background: 'linear-gradient(135deg, rgba(200, 64, 26, 0.15) 0%, rgba(20, 20, 20, 0) 100%)',
+        border: '1px solid var(--border-dark-strong)',
+        borderRadius: 'var(--radius-lg)',
+        padding: '2.5rem 3rem',
+        marginBottom: '2.5rem',
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        <div style={{ position: 'relative', zIndex: 2 }}>
+          <span style={{
+            fontSize: '0.7rem',
+            fontWeight: 800,
+            textTransform: 'uppercase',
+            letterSpacing: '0.12em',
+            color: 'var(--accent)',
+            background: 'var(--accent-subtle)',
+            padding: '3px 8px',
+            borderRadius: '4px'
+          }}>Getting Started</span>
+          <h1 style={{
+            fontSize: '2.5rem',
+            fontWeight: 900,
+            margin: '0.75rem 0 0.5rem 0',
+            color: 'var(--text-on-dark)',
+            fontFamily: 'var(--font-display)',
+            textTransform: 'uppercase'
+          }}>Welcome to GitMatch, {name}!</h1>
+          <p style={{
+            fontSize: '0.95rem',
+            color: 'var(--text-muted-on-dark)',
+            maxWidth: '560px',
+            lineHeight: 1.6,
+            margin: 0
+          }}>
+            Analyze and rank engineer applicants automatically by deep-scanning their public GitHub activities, dependency footprints, and profile signals.
+          </p>
+        </div>
       </div>
-      <h2 className="dash-empty-title">Welcome, {name}</h2>
-      <p className="dash-empty-desc">
-        Start screening GitHub candidates against job descriptions. Get ranked results in minutes.
-      </p>
-      <div className="dash-empty-actions">
-        <button className="btn-quick-primary" onClick={onBulk}>
-          <Users size={16} />
-          Start Bulk Screening
-        </button>
-        <button className="btn-quick-secondary" onClick={onSingle}>
-          <User size={15} />
-          Analyze a Candidate
-        </button>
+
+      {/* Two Column Choices */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+        gap: '1.5rem',
+        marginBottom: '2rem'
+      }}>
+        {/* Choice 1: Bulk Screening */}
+        <div className="onboarding-card" style={{
+          background: 'transparent',
+          border: '1px solid var(--border-dark)',
+          borderRadius: 'var(--radius-md)',
+          padding: '2rem',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          transition: 'var(--trans)'
+        }}>
+          <div>
+            <div style={{
+              color: 'var(--info-text)',
+              marginBottom: '1.25rem',
+              display: 'flex',
+              alignItems: 'center'
+            }}>
+              <Users size={28} />
+            </div>
+            <h3 style={{
+              fontSize: '1.25rem',
+              fontWeight: 800,
+              margin: '0 0 0.5rem 0',
+              color: 'var(--text-on-dark)',
+              textTransform: 'uppercase',
+              fontFamily: 'var(--font-display)',
+              letterSpacing: '0.01em'
+            }}>Bulk Candidate Screening</h3>
+            <p style={{
+              fontSize: '0.85rem',
+              color: 'var(--text-muted-on-dark)',
+              lineHeight: 1.55,
+              margin: '0 0 1.5rem 0'
+            }}>
+              Evaluate and rank lists of candidate profiles in parallel. Paste a single job description to generate normalized candidate charts automatically.
+            </p>
+          </div>
+          <button
+            onClick={onBulk}
+            className="btn-quick-primary"
+            style={{ width: '100%', justifyContent: 'center', height: '42px' }}
+          >
+            <Users size={14} /> Screen Candidates
+          </button>
+        </div>
+
+        {/* Choice 2: Single Candidate */}
+        <div className="onboarding-card" style={{
+          background: 'transparent',
+          border: '1px solid var(--border-dark)',
+          borderRadius: 'var(--radius-md)',
+          padding: '2rem',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          transition: 'var(--trans)'
+        }}>
+          <div>
+            <div style={{
+              color: 'var(--accent)',
+              marginBottom: '1.25rem',
+              display: 'flex',
+              alignItems: 'center'
+            }}>
+              <User size={28} />
+            </div>
+            <h3 style={{
+              fontSize: '1.25rem',
+              fontWeight: 800,
+              margin: '0 0 0.5rem 0',
+              color: 'var(--text-on-dark)',
+              textTransform: 'uppercase',
+              fontFamily: 'var(--font-display)',
+              letterSpacing: '0.01em'
+            }}>Single Profile Audit</h3>
+            <p style={{
+              fontSize: '0.85rem',
+              color: 'var(--text-muted-on-dark)',
+              lineHeight: 1.55,
+              margin: '0 0 1.5rem 0'
+            }}>
+              Perform a deep-dive match report on a single GitHub user. Extract detailed confidence, evidence breakdown, strengths, and weaknesses.
+            </p>
+          </div>
+          <button
+            onClick={onSingle}
+            className="btn-quick-secondary"
+            style={{ width: '100%', justifyContent: 'center', height: '42px' }}
+          >
+            <User size={14} /> Analyze Profile
+          </button>
+        </div>
       </div>
     </div>
   );

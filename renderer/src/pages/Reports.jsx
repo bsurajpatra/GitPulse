@@ -121,9 +121,22 @@ function SingleReportCard({ report, onReopen, onDelete }) {
 export default function Reports({ reports, deleteReport, onBulkReopen, onSingleReopen }) {
   const [search, setSearch] = useState('');
   const [tab, setTab] = useState('bulk'); // 'bulk' | 'single'
+  const [deleteConfirm, setDeleteConfirm] = useState(null); // { id, type, name }
   const navigate = useNavigate();
 
   const { bulk = [], single = [] } = reports;
+
+  const handleDeleteClick = (id, type) => {
+    let name = '';
+    if (type === 'bulk') {
+      const rep = bulk.find(r => r.id === id);
+      name = rep ? (rep.name || 'Untitled Screening') : 'Screening';
+    } else {
+      const rep = single.find(r => r.id === id);
+      name = rep ? (rep.result?.profile?.name || `@${rep.username}`) : 'Candidate';
+    }
+    setDeleteConfirm({ id, type, name });
+  };
 
   const filteredBulk = bulk.filter(r =>
     (r.name || '').toLowerCase().includes(search.toLowerCase())
@@ -214,7 +227,7 @@ export default function Reports({ reports, deleteReport, onBulkReopen, onSingleR
                       key={r.id}
                       report={r}
                       onReopen={onBulkReopen}
-                      onDelete={deleteReport}
+                      onDelete={handleDeleteClick}
                     />
                   ))
                 ) : (
@@ -234,7 +247,7 @@ export default function Reports({ reports, deleteReport, onBulkReopen, onSingleR
                       key={r.id}
                       report={r}
                       onReopen={onSingleReopen}
-                      onDelete={deleteReport}
+                      onDelete={handleDeleteClick}
                     />
                   ))
                 ) : (
@@ -247,6 +260,74 @@ export default function Reports({ reports, deleteReport, onBulkReopen, onSingleR
           </>
         )}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirm && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.7)',
+          zIndex: 1000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          animation: 'fadeIn 0.2s ease'
+        }}>
+          <div style={{
+            background: 'var(--bg-dark-2)',
+            border: '1px solid var(--border-dark-strong)',
+            padding: '1.75rem',
+            borderRadius: 'var(--radius-md)',
+            width: '100%',
+            maxWidth: '400px',
+            animation: 'scaleIn 0.25s ease'
+          }}>
+            <h3 style={{ margin: '0 0 0.5rem 0', color: 'var(--text-on-dark)', fontWeight: 800 }}>Confirm Deletion</h3>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted-on-dark)', margin: '0 0 1.5rem 0', lineHeight: 1.5 }}>
+              Are you sure you want to delete the report for <strong>{deleteConfirm.name}</strong>? This action cannot be undone.
+            </p>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
+              <button
+                type="button"
+                onClick={() => setDeleteConfirm(null)}
+                style={{
+                  background: 'var(--bg-dark)',
+                  border: '1px solid var(--border-dark-strong)',
+                  color: 'var(--text-on-dark)',
+                  padding: '0.45rem 1rem',
+                  borderRadius: 'var(--radius-sm)',
+                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                  cursor: 'pointer'
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  deleteReport(deleteConfirm.id, deleteConfirm.type);
+                  setDeleteConfirm(null);
+                }}
+                style={{
+                  background: 'var(--danger-text)',
+                  color: '#fff',
+                  padding: '0.45rem 1rem',
+                  borderRadius: 'var(--radius-sm)',
+                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                  cursor: 'pointer'
+                }}
+              >
+                Delete Report
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

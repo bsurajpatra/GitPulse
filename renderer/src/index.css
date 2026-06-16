@@ -2180,15 +2180,15 @@ img { display: block; max-width: 100%; }
 }
 
 .report-card-icon-bulk {
-  background: var(--info-bg);
+  background: transparent;
   color: var(--info-text);
-  border: 1px solid var(--info-border);
+  border: none;
 }
 
 .report-card-icon-single {
-  background: var(--purple-bg);
+  background: transparent;
   color: var(--purple-text);
-  border: 1px solid var(--purple-border);
+  border: none;
 }
 
 .report-avatar-thumb {
@@ -2282,8 +2282,8 @@ img { display: block; max-width: 100%; }
   align-items: center;
   justify-content: center;
   padding: 4rem 2rem;
-  background: var(--bg-dark-2);
-  border: 1px solid var(--border-dark);
+  background: transparent;
+  border: none;
   border-radius: var(--radius-md);
   text-align: center;
 }
