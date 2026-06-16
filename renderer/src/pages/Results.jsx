@@ -18,6 +18,7 @@ const Results = ({ data, onBack }) => {
     profileSkills = [],
     jdSkills = [],
     profile,
+    evidenceMap = {},
   } = data;
 
   const role = data.role || 'Job Role';
@@ -46,7 +47,7 @@ const Results = ({ data, onBack }) => {
 
         {/* Skills Grid */}
         <div className="results-grid">
-          <MatchedSkills skills={matchedSkills} />
+          <MatchedSkills skills={matchedSkills} evidenceMap={evidenceMap} />
           <MissingSkills skills={missingSkills} />
         </div>
 

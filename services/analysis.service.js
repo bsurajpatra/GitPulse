@@ -272,6 +272,7 @@ class AnalysisService {
       experience: rawMatchResult.experience,
       jdSkills: rawMatchResult.jdSkills,
       profileSkills: rawMatchResult.profileSkills,
+      evidenceMap: rawMatchResult.evidenceMap,
       ...formattedResult
     };
 
@@ -293,13 +294,22 @@ class AnalysisService {
     const cachedDeps = getCachedData(cacheKey);
 
     if (cachedDeps) {
+      if (Array.isArray(cachedDeps)) {
+        return {
+          ...repo,
+          deepSkills: cachedDeps,
+          deepSkillsRaw: []
+        };
+      }
       return {
         ...repo,
-        deepSkills: cachedDeps
+        deepSkills: cachedDeps.deepSkills || [],
+        deepSkillsRaw: cachedDeps.deepSkillsRaw || []
       };
     }
 
     const deepSkills = new Set();
+    const deepSkillsRaw = [];
 
     // Try to get root contents listing
     const rootContents = await githubService.getRepoRootContents(owner, repo.name);
@@ -319,29 +329,42 @@ class AnalysisService {
 
     for (const { depFile, content } of fetchedFiles) {
       if (!content) continue;
-      const skills = this.parseDepFile(depFile, content);
-      skills.forEach(s => deepSkills.add(s));
+      const parsedItems = this.parseDepFile(depFile, content);
+      parsedItems.forEach(item => {
+        deepSkills.add(item.skill);
+        deepSkillsRaw.push({
+          skill: item.skill,
+          file: depFile,
+          source: item.source
+        });
+      });
     }
 
     const deepSkillsArray = Array.from(deepSkills);
     
     // Save to Cache
-    setCachedData(cacheKey, deepSkillsArray);
+    setCachedData(cacheKey, {
+      deepSkills: deepSkillsArray,
+      deepSkillsRaw
+    });
 
     return {
       ...repo,
-      deepSkills: deepSkillsArray
+      deepSkills: deepSkillsArray,
+      deepSkillsRaw
     };
   }
 
   /**
    * Parses a dependency file and extracts known skill signals.
+   * Returns array of { skill, source } matches.
    */
   parseDepFile(filename, content) {
-    const skills = new Set();
+    const matches = [];
 
     try {
-      if (filename === 'package.json') {
+      const lowerFile = filename.toLowerCase();
+      if (lowerFile === 'package.json') {
         const json = JSON.parse(content);
         const allDeps = {
           ...json.dependencies,
@@ -350,62 +373,84 @@ class AnalysisService {
         };
         for (const pkg of Object.keys(allDeps)) {
           const skill = DEP_TO_SKILL[pkg.toLowerCase()];
-          if (skill) skills.add(skill);
+          if (skill) {
+            matches.push({ skill, source: pkg });
+          }
         }
 
         // Also check scripts for framework signals
         const scripts = JSON.stringify(json.scripts || '').toLowerCase();
-        if (scripts.includes('react-scripts') || scripts.includes('react-app')) skills.add('React');
-        if (scripts.includes('next')) skills.add('Next.js');
-        if (scripts.includes('vue-cli') || scripts.includes('nuxt')) skills.add('Vue.js');
-        if (scripts.includes('ng ')) skills.add('Angular');
-
-      } else if (filename === 'requirements.txt' || filename === 'pipfile') {
-        const lines = content.split('\n');
-        for (const line of lines) {
-          const pkg = line.split('==')[0].split('>=')[0].split('<=')[0].trim().toLowerCase();
-          const skill = DEP_TO_SKILL[pkg];
-          if (skill) skills.add(skill);
-          // Add Python as base language if any Python file exists
-          skills.add('Python');
+        if (scripts.includes('react-scripts') || scripts.includes('react-app')) {
+          matches.push({ skill: 'React', source: 'npm script: react-scripts' });
+        }
+        if (scripts.includes('next')) {
+          matches.push({ skill: 'Next.js', source: 'npm script: next' });
+        }
+        if (scripts.includes('vue-cli') || scripts.includes('nuxt')) {
+          matches.push({ skill: 'Vue.js', source: 'npm script: vue/nuxt' });
+        }
+        if (scripts.includes('ng ')) {
+          matches.push({ skill: 'Angular', source: 'npm script: ng' });
         }
 
-      } else if (filename === 'gemfile') {
-        // Ruby gem detection
+      } else if (lowerFile === 'requirements.txt' || lowerFile === 'pipfile') {
+        const lines = content.split('\n');
+        for (const line of lines) {
+          const cleanLine = line.trim();
+          if (!cleanLine || cleanLine.startsWith('#')) continue;
+          const pkg = cleanLine.split('==')[0].split('>=')[0].split('<=')[0].trim().toLowerCase();
+          const skill = DEP_TO_SKILL[pkg];
+          if (skill) {
+            matches.push({ skill, source: pkg });
+          }
+        }
+        matches.push({ skill: 'Python', source: 'python environment' });
+
+      } else if (lowerFile === 'gemfile') {
         const gemMatches = content.match(/gem\s+['"]([^'"]+)['"]/gi) || [];
         for (const match of gemMatches) {
           const gemName = match.replace(/gem\s+['"]/i, '').replace(/['"]/, '').trim().toLowerCase();
           const skill = DEP_TO_SKILL[gemName];
-          if (skill) skills.add(skill);
+          if (skill) {
+            matches.push({ skill, source: gemName });
+          }
         }
-        skills.add('Ruby');
+        matches.push({ skill: 'Ruby', source: 'ruby environment' });
 
-      } else if (filename === 'go.mod') {
-        skills.add('Go');
+      } else if (lowerFile === 'go.mod') {
+        matches.push({ skill: 'Go', source: 'go environment' });
         const requireMatches = content.match(/require\s+([^\s]+)/g) || [];
         for (const match of requireMatches) {
           const mod = match.replace('require ', '').split('/').pop().toLowerCase();
           const skill = DEP_TO_SKILL[mod];
-          if (skill) skills.add(skill);
+          if (skill) {
+            matches.push({ skill, source: mod });
+          }
         }
 
-      } else if (filename === 'pom.xml') {
-        skills.add('Java');
-        if (content.includes('spring-boot')) skills.add('Spring Boot');
-        if (content.includes('hibernate')) skills.add('PostgreSQL');
+      } else if (lowerFile === 'pom.xml') {
+        matches.push({ skill: 'Java', source: 'maven project' });
+        if (content.includes('spring-boot')) {
+          matches.push({ skill: 'Spring Boot', source: 'dependency: spring-boot' });
+        }
+        if (content.includes('hibernate')) {
+          matches.push({ skill: 'PostgreSQL', source: 'dependency: hibernate' });
+        }
 
-      } else if (filename === 'composer.json') {
-        skills.add('PHP');
-        if (content.includes('laravel')) skills.add('Laravel');
+      } else if (lowerFile === 'composer.json') {
+        matches.push({ skill: 'PHP', source: 'composer project' });
+        if (content.includes('laravel')) {
+          matches.push({ skill: 'Laravel', source: 'dependency: laravel' });
+        }
 
-      } else if (filename === 'cargo.toml') {
-        skills.add('Rust');
+      } else if (lowerFile === 'cargo.toml') {
+        matches.push({ skill: 'Rust', source: 'cargo project' });
       }
     } catch (e) {
       // Silently skip malformed files
     }
 
-    return Array.from(skills);
+    return matches;
   }
 
   /**

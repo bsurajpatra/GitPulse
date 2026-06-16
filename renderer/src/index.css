@@ -2602,3 +2602,150 @@ img { display: block; max-width: 100%; }
   border-color: var(--accent-hover);
 }
 
+/* ============================================ */
+/* Phase 5 Evidence Engine & MatchedSkills UI   */
+/* ============================================ */
+.skills-evidence-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+  margin-top: 0.75rem;
+}
+
+.skill-evidence-item {
+  border: 1px solid var(--border-dark);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--bg-dark-2);
+  transition: var(--trans);
+}
+
+.skill-evidence-item:hover {
+  border-color: var(--border-dark-strong);
+}
+
+.skill-evidence-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  background: transparent;
+  text-align: left;
+  transition: var(--trans);
+  border: none;
+  cursor: pointer;
+}
+
+.skill-evidence-trigger:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.skill-evidence-trigger.active {
+  background: var(--bg-dark-3);
+  border-bottom: 1px solid var(--border-dark);
+}
+
+.skill-trigger-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.skill-pill-icon-matched {
+  color: var(--success-text);
+  font-weight: bold;
+  font-size: 0.85rem;
+}
+
+.skill-trigger-name {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-on-dark);
+}
+
+.skill-trigger-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--text-muted-on-dark);
+}
+
+.skill-confidence-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 0.15rem 0.45rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.skill-evidence-details {
+  padding: 0.85rem 1rem;
+  background: #0b0b0b;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.02);
+}
+
+.evidence-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted-on-dark);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.evidence-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.evidence-row {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr 2fr;
+  gap: 0.75rem;
+  align-items: center;
+  font-size: 0.78rem;
+  padding: 0.35rem 0.5rem;
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 2px;
+  color: var(--text-on-dark);
+}
+
+.evidence-repo {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.evidence-type {
+  text-transform: uppercase;
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-subtle);
+  border: 1px solid var(--accent-border);
+  padding: 0.05rem 0.35rem;
+  border-radius: 2px;
+  text-align: center;
+  width: fit-content;
+}
+
+.evidence-source {
+  color: var(--text-muted-on-dark);
+  font-family: monospace;
+  font-size: 0.75rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+

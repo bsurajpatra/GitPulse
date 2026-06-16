@@ -12,8 +12,10 @@
  */
 
 import { SKILL_DICTIONARY } from './jdParser.js';
+import { gatherEvidence } from './evidenceEngine.js';
 
 // ── helpers ──────────────────────────────────────────────────────────────────
+
 
 function normalizeSkill(rawSkill) {
   if (!rawSkill || typeof rawSkill !== 'string') return null;
@@ -104,5 +106,15 @@ export function extractSkillsFromProfile(repos, extra = {}) {
   }
 
   const skills = Array.from(skillSet).sort();
-  return { skills, weightMap };
+
+  const evidenceList = gatherEvidence(repos, extra);
+  const evidenceMap = {};
+  evidenceList.forEach((item) => {
+    evidenceMap[item.skill] = {
+      confidence: item.confidence,
+      evidence: item.evidence,
+    };
+  });
+
+  return { skills, weightMap, evidenceMap };
 }
