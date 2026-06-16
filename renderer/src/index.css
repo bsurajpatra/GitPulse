@@ -1036,17 +1036,20 @@ img { display: block; max-width: 100%; }
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: var(--text-muted-on-dark);
-  padding: 0.2rem 0.55rem;
-  border: 1px solid var(--border-dark-strong);
+  color: var(--accent);
+  background: var(--accent-subtle);
+  padding: 0.25rem 0.65rem;
+  border: 1px solid var(--accent-border);
   border-radius: var(--radius-full);
   margin-left: auto;
   transition: var(--trans);
+  cursor: pointer;
 }
 
 .btn-csv-upload:hover {
-  color: var(--text-on-dark);
-  border-color: var(--text-on-dark);
+  color: #fff;
+  background: var(--accent);
+  border-color: var(--accent);
 }
 
 .bulk-textarea {

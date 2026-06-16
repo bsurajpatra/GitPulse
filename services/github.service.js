@@ -128,17 +128,21 @@ class GitHubService {
     }
   }
 
-  async getRepoRootContents(owner, repo) {
+  async getRepoContents(owner, repo, path = "") {
     try {
       const { data } = await this.octokit.rest.repos.getContent({
         owner,
         repo,
-        path: "",
+        path,
       });
       return Array.isArray(data) ? data : [];
     } catch (error) {
       return [];
     }
+  }
+
+  async getRepoRootContents(owner, repo) {
+    return this.getRepoContents(owner, repo, "");
   }
 
   async getFileContents(owner, repo, path) {

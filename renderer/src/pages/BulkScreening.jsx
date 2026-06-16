@@ -408,7 +408,7 @@ const BulkScreening = ({ onSaveReport }) => {
                   {screeningName || 'Screening Complete'}
                 </h2>
                 <p className="bulk-results-sub">
-                  {results.statistics.successfulAnalyses} candidates analyzed · ranked by Job Fit Score
+                  {results.statistics.successfulAnalyses} candidates analyzed · ranked by Final Score
                 </p>
               </div>
               <button className="btn-new-screening" onClick={handleNewScreening}>
@@ -462,16 +462,22 @@ const BulkScreening = ({ onSaveReport }) => {
                     <tr>
                       <th>Rank</th>
                       <th>Candidate</th>
-                      <th>Job Fit Score</th>
+                      <th>Job Fit</th>
+                      <th>Quality</th>
+                      <th>Final Score</th>
                       <th>Status</th>
                       <th>Action</th>
                     </tr>
                   </thead>
                   <tbody>
                     {results.allRankings.map((candidate) => {
-                      const score = candidate.weightedMatchScore ?? candidate.overallScore ?? 0;
-                      const isShortlisted = score >= minimumScore;
-                      const color = getScoreColor(score);
+                      const jobFitScore = candidate.weightedMatchScore ?? candidate.overallScore ?? 0;
+                      const qualityScore = candidate.quality?.qualityScore ?? 0;
+                      const finalScore = candidate.finalScore ?? Math.round(0.7 * jobFitScore + 0.3 * qualityScore);
+                      const isShortlisted = finalScore >= minimumScore;
+                      const finalColor = getScoreColor(finalScore);
+                      const jobFitColor = getScoreColor(jobFitScore);
+                      const qualityColor = getScoreColor(qualityScore);
 
                       return (
                         <tr
@@ -504,21 +510,35 @@ const BulkScreening = ({ onSaveReport }) => {
                             </div>
                           </td>
 
-                          {/* Score */}
+                          {/* Job Fit */}
+                          <td>
+                            <span style={{ color: jobFitColor, fontWeight: 700, fontSize: '0.88rem' }}>
+                              {jobFitScore}%
+                            </span>
+                          </td>
+
+                          {/* Quality */}
+                          <td>
+                            <span style={{ color: qualityColor, fontWeight: 700, fontSize: '0.88rem' }}>
+                              {qualityScore}%
+                            </span>
+                          </td>
+
+                          {/* Final Score */}
                           <td>
                             <div className="score-cell">
-                              <span className="score-cell-value" style={{ color }}>
-                                {score}%
+                              <span className="score-cell-value" style={{ color: finalColor }}>
+                                {finalScore}%
                               </span>
                               <div className="score-cell-bar-row">
                                 <div className="score-cell-track">
                                   <div
                                     className="score-cell-fill"
-                                    style={{ width: `${score}%`, background: color }}
+                                    style={{ width: `${finalScore}%`, background: finalColor }}
                                   />
                                 </div>
-                                <span className="score-cell-tier" style={{ color }}>
-                                  {getScoreTier(score)}
+                                <span className="score-cell-tier" style={{ color: finalColor }}>
+                                  {getScoreTier(finalScore)}
                                 </span>
                               </div>
                             </div>

@@ -273,7 +273,8 @@ class AnalysisService {
       jdSkills: rawMatchResult.jdSkills,
       profileSkills: rawMatchResult.profileSkills,
       evidenceMap: rawMatchResult.evidenceMap,
-      ...formattedResult
+      ...formattedResult,
+      quality: rawMatchResult.quality || null
     };
 
     // Cache the final structured result
@@ -283,7 +284,7 @@ class AnalysisService {
   }
 
   /**
-   * Fetches dependency files from a repo root and maps known packages to skills.
+   * Fetches dependency files from a repo root and subfolders, and maps known packages to skills.
    * Uses repository ID and pushed_at date for precise dependency resolution caching.
    */
   async enrichRepoWithDependencies(githubService, repo) {
@@ -293,18 +294,13 @@ class AnalysisService {
     const cacheKey = `repo_deps_${repo.id}_${repo.pushed_at}`;
     const cachedDeps = getCachedData(cacheKey);
 
-    if (cachedDeps) {
-      if (Array.isArray(cachedDeps)) {
-        return {
-          ...repo,
-          deepSkills: cachedDeps,
-          deepSkillsRaw: []
-        };
-      }
+    if (cachedDeps && !Array.isArray(cachedDeps) && cachedDeps.rootContents && cachedDeps.readmeText !== undefined) {
       return {
         ...repo,
         deepSkills: cachedDeps.deepSkills || [],
-        deepSkillsRaw: cachedDeps.deepSkillsRaw || []
+        deepSkillsRaw: cachedDeps.deepSkillsRaw || [],
+        rootContents: cachedDeps.rootContents || [],
+        readmeText: cachedDeps.readmeText || null
       };
     }
 
@@ -315,11 +311,57 @@ class AnalysisService {
     const rootContents = await githubService.getRepoRootContents(owner, repo.name);
     const rootFileNames = rootContents.map(f => f.name.toLowerCase());
 
-    // Optimization: Fetch all present dependency files in parallel rather than sequentially
-    const presentFiles = DEPENDENCY_FILES.filter(depFile =>
-      rootFileNames.includes(depFile.toLowerCase())
+    // Extract directory listing metadata for quality analysis
+    const files = rootContents.map(f => ({
+      name: f.name,
+      type: f.type // "file" or "dir"
+    }));
+
+    // Common subdirectories to scan in depth for production layouts
+    const SUBFOLDERS_TO_SCAN = ['client', 'server', 'frontend', 'backend', 'packages', 'apps', 'api', 'app', 'src'];
+    const subdirs = rootContents.filter(f => f.type === 'dir' && SUBFOLDERS_TO_SCAN.includes(f.name.toLowerCase()));
+
+    // Fetch subfolder listings in parallel to avoid API blocks
+    const subdirContentsList = await Promise.all(
+      subdirs.map(async (dir) => {
+        const contents = await githubService.getRepoContents(owner, repo.name, dir.path);
+        return { dir, contents };
+      })
     );
 
+    // Track present dependency files (root + subfolders)
+    const presentFiles = [];
+    
+    // Add root dependency files
+    DEPENDENCY_FILES.forEach(depFile => {
+      if (rootFileNames.includes(depFile.toLowerCase())) {
+        presentFiles.push(depFile);
+      }
+    });
+
+    // Add subfolder files and merge folder metadata
+    subdirContentsList.forEach(({ dir, contents }) => {
+      contents.forEach(f => {
+        const relativePath = `${dir.name}/${f.name}`;
+        files.push({
+          name: relativePath,
+          type: f.type
+        });
+
+        if (DEPENDENCY_FILES.includes(f.name.toLowerCase())) {
+          presentFiles.push(relativePath);
+        }
+      });
+    });
+
+    // Find and fetch README content if present in root
+    const readmeFile = rootContents.find(f => f.type === 'file' && f.name.toLowerCase().startsWith('readme'));
+    let readmeText = null;
+    if (readmeFile) {
+      readmeText = await githubService.getFileContents(owner, repo.name, readmeFile.name);
+    }
+
+    // Fetch all present dependency files in parallel
     const fetchedFiles = await Promise.all(
       presentFiles.map(async (depFile) => {
         const content = await githubService.getFileContents(owner, repo.name, depFile);
@@ -329,7 +371,8 @@ class AnalysisService {
 
     for (const { depFile, content } of fetchedFiles) {
       if (!content) continue;
-      const parsedItems = this.parseDepFile(depFile, content);
+      const filename = depFile.split('/').pop();
+      const parsedItems = this.parseDepFile(filename, content);
       parsedItems.forEach(item => {
         deepSkills.add(item.skill);
         deepSkillsRaw.push({
@@ -345,13 +388,17 @@ class AnalysisService {
     // Save to Cache
     setCachedData(cacheKey, {
       deepSkills: deepSkillsArray,
-      deepSkillsRaw
+      deepSkillsRaw,
+      rootContents: files,
+      readmeText
     });
 
     return {
       ...repo,
       deepSkills: deepSkillsArray,
-      deepSkillsRaw
+      deepSkillsRaw,
+      rootContents: files,
+      readmeText
     };
   }
 

@@ -66,7 +66,9 @@ function BulkReportCard({ report, onReopen, onDelete }) {
 
 // ─── Single Report Card ──────────────────────────────────────────────────────
 function SingleReportCard({ report, onReopen, onDelete }) {
-  const score = report.result?.weightedMatchScore ?? report.result?.overallScore ?? 0;
+  const jobFit = report.result?.weightedMatchScore ?? report.result?.overallScore ?? 0;
+  const quality = report.result?.quality?.qualityScore ?? 0;
+  const finalScore = report.result?.finalScore ?? Math.round(0.7 * jobFit + 0.3 * quality);
   return (
     <div className="report-card">
       <div className="report-card-body">
@@ -88,8 +90,12 @@ function SingleReportCard({ report, onReopen, onDelete }) {
           <div className="report-card-meta">
             <span>@{report.username}</span>
             <span className="report-meta-dot">·</span>
-            <span style={{ color: getScoreColor(score), fontWeight: 700 }}>
-              {score}% match
+            <span style={{ color: getScoreColor(finalScore), fontWeight: 800 }}>
+              {finalScore}% final
+            </span>
+            <span className="report-meta-dot">·</span>
+            <span style={{ fontSize: '0.7rem', opacity: 0.85 }}>
+              {jobFit}% fit · {quality}% quality
             </span>
             <span className="report-meta-dot">·</span>
             <span>{report.result?.role || 'Job analysis'}</span>

@@ -6,15 +6,26 @@
  */
 
 /**
- * Ranks candidates by Job Fit Score descending and adds a `rank` field.
+ * Ranks candidates by Final Candidate Score descending and adds a `rank` field.
+ * Formula: 70% Job Fit Score, 30% Quality Score.
+ *
  * @param {Array<Object>} results - Candidate analysis results from bulkCandidateAnalysis.service
  * @returns {Array<Object>} Ranked candidates with `rank` (1-indexed)
  */
 export function rankCandidates(results) {
   return [...results]
+    .map(c => {
+      const jobFitScore = c.weightedMatchScore ?? c.overallScore ?? 0;
+      const qualityScore = c.quality?.qualityScore ?? 0;
+      const finalScore = Math.round(0.7 * jobFitScore + 0.3 * qualityScore);
+      return {
+        ...c,
+        finalScore
+      };
+    })
     .sort((a, b) => {
-      const scoreA = a.weightedMatchScore ?? a.overallScore ?? 0;
-      const scoreB = b.weightedMatchScore ?? b.overallScore ?? 0;
+      const scoreA = a.finalScore ?? 0;
+      const scoreB = b.finalScore ?? 0;
       return scoreB - scoreA;
     })
     .map((candidate, index) => ({
@@ -31,8 +42,8 @@ export function rankCandidates(results) {
  * @returns {Object} Statistics summary object
  */
 export function generateStatistics(rankings, failures, minimumScore = 0) {
-  const scores = rankings.map(r => r.weightedMatchScore ?? r.overallScore ?? 0);
-  const shortlisted = rankings.filter(r => (r.weightedMatchScore ?? r.overallScore ?? 0) >= minimumScore);
+  const scores = rankings.map(r => r.finalScore ?? 0);
+  const shortlisted = rankings.filter(r => (r.finalScore ?? 0) >= minimumScore);
 
   return {
     totalCandidates:      rankings.length + failures.length,
