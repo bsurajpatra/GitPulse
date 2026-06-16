@@ -27,7 +27,10 @@ export default function Settings({ userData, onLogout }) {
   useEffect(() => {
     fetchCacheSize();
     window.electronAPI.getPreferences().then(prefs => {
-      if (prefs?.theme) setTheme(prefs.theme);
+      if (prefs?.theme) {
+        setTheme(prefs.theme);
+        document.documentElement.setAttribute('data-theme', prefs.theme);
+      }
     });
   }, []);
 
@@ -45,6 +48,7 @@ export default function Settings({ userData, onLogout }) {
 
   const handleThemeChange = async (newTheme) => {
     setTheme(newTheme);
+    document.documentElement.setAttribute('data-theme', newTheme);
     try {
       await window.electronAPI.setPreferences({ theme: newTheme });
     } catch (err) {
@@ -141,7 +145,6 @@ export default function Settings({ userData, onLogout }) {
                   <button
                     className={`btn-theme-option ${theme === 'light' ? 'active' : ''}`}
                     onClick={() => handleThemeChange('light')}
-                    disabled
                   >
                     <Sun size={13} /> Light
                   </button>

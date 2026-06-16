@@ -46,6 +46,13 @@ function App() {
 
     initAuth();
 
+    // Load and apply theme preference
+    window.electronAPI.getPreferences().then(prefs => {
+      if (prefs?.theme) {
+        document.documentElement.setAttribute('data-theme', prefs.theme);
+      }
+    });
+
     window.electronAPI.onAuthSuccess((newToken) => {
       setToken(newToken);
       fetchProfile(newToken);

@@ -2749,3 +2749,104 @@ img { display: block; max-width: 100%; }
   white-space: nowrap;
 }
 
+/* ============================================ */
+/* Light Mode Theme Overrides                   */
+/* ============================================ */
+[data-theme="light"] {
+  --bg-dark:              #ede8e0; /* Cream background */
+  --bg-dark-2:            #f4eee4; /* Soft container background */
+  --bg-dark-3:            #e4ddd4; /* Card background */
+
+  --text-on-dark:         #1a1a1a; /* Dark text */
+  --text-muted-on-dark:   #6b665c; /* Muted dark text */
+
+  --border-dark:          rgba(0, 0, 0, 0.08);
+  --border-dark-strong:   rgba(0, 0, 0, 0.15);
+
+  /* Semantic status colors adjusted for light mode readability */
+  --success-text:   #15803d; /* Darker green */
+  --success-bg:     rgba(21, 128, 61, 0.08);
+  --success-border: rgba(21, 128, 61, 0.18);
+
+  --danger-text:    #b91c1c; /* Darker red */
+  --danger-bg:      rgba(185, 28, 28, 0.08);
+  --danger-border:  rgba(185, 28, 28, 0.18);
+
+  --warning-text:   #b45309; /* Darker amber */
+  --warning-bg:     rgba(180, 83, 9, 0.08);
+  --warning-border: rgba(180, 83, 9, 0.18);
+
+  --info-text:      #1d4ed8; /* Darker blue */
+  --info-bg:        rgba(29, 78, 216, 0.08);
+  --info-border:    rgba(29, 78, 216, 0.18);
+
+  --purple-text:    #6d28d9; /* Darker purple */
+  --purple-bg:      rgba(109, 40, 217, 0.08);
+  --purple-border:  rgba(109, 40, 217, 0.18);
+}
+
+/* Light Mode Webkit Scrollbar */
+[data-theme="light"] ::-webkit-scrollbar-track {
+  background: #ede8e0;
+}
+[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background: #c4bbb0;
+}
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+  background: #ab9f90;
+}
+
+/* Light Mode Sidebar overrides */
+[data-theme="light"] .app-sidebar {
+  background: #e4ddd4;
+  border-right: 1px solid rgba(0, 0, 0, 0.08);
+}
+[data-theme="light"] .sidebar-brand {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+[data-theme="light"] .sidebar-brand-name {
+  color: #1a1a1a;
+}
+[data-theme="light"] .sidebar-nav-item:hover {
+  background: rgba(0, 0, 0, 0.04);
+  color: #1a1a1a;
+}
+[data-theme="light"] .sidebar-nav-active {
+  background: rgba(0, 0, 0, 0.08) !important;
+  color: #1a1a1a !important;
+  border-left-color: var(--accent) !important;
+}
+[data-theme="light"] .sidebar-divider {
+  background: rgba(0, 0, 0, 0.08);
+}
+[data-theme="light"] .sidebar-footer {
+  background: #dacfbf;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+[data-theme="light"] .sidebar-user-name {
+  color: #1a1a1a;
+}
+[data-theme="light"] .sidebar-user-avatar {
+  border-color: rgba(0, 0, 0, 0.1);
+}
+[data-theme="light"] .btn-sidebar-logout {
+  border-color: rgba(0, 0, 0, 0.1);
+  color: #1a1a1a;
+}
+[data-theme="light"] .btn-sidebar-logout:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* Light Mode Table adjustments */
+[data-theme="light"] .bulk-table tbody tr:hover td {
+  background: rgba(0, 0, 0, 0.015);
+}
+
+/* Light Mode Dashboard stat card hover shadow */
+[data-theme="light"] .dashboard-stat-card:hover,
+[data-theme="light"] .settings-section-card:hover,
+[data-theme="light"] .report-card:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+}
+
+
