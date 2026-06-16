@@ -469,7 +469,7 @@ const BulkScreening = ({ onSaveReport }) => {
                   </thead>
                   <tbody>
                     {results.allRankings.map((candidate) => {
-                      const score = candidate.overallScore || 0;
+                      const score = candidate.weightedMatchScore ?? candidate.overallScore ?? 0;
                       const isShortlisted = score >= minimumScore;
                       const color = getScoreColor(score);
 

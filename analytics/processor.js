@@ -23,7 +23,7 @@ const processJobFit = (repos, jobDescription) => {
   const { skills: profileSkills, weightMap, evidenceMap } = extractSkillsFromProfile(repos, extra);
 
   // 3. Weighted match against JD requirements
-  const matchResult = calculateMatchScore(parsedJd.skills, profileSkills, weightMap);
+  const matchResult = calculateMatchScore(parsedJd.skills, profileSkills, weightMap, jobDescription, evidenceMap);
 
   return {
     role:         parsedJd.role,

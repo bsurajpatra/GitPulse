@@ -12,7 +12,11 @@
  */
 export function rankCandidates(results) {
   return [...results]
-    .sort((a, b) => (b.overallScore || 0) - (a.overallScore || 0))
+    .sort((a, b) => {
+      const scoreA = a.weightedMatchScore ?? a.overallScore ?? 0;
+      const scoreB = b.weightedMatchScore ?? b.overallScore ?? 0;
+      return scoreB - scoreA;
+    })
     .map((candidate, index) => ({
       ...candidate,
       rank: index + 1,
@@ -27,8 +31,8 @@ export function rankCandidates(results) {
  * @returns {Object} Statistics summary object
  */
 export function generateStatistics(rankings, failures, minimumScore = 0) {
-  const scores = rankings.map(r => r.overallScore || 0);
-  const shortlisted = rankings.filter(r => (r.overallScore || 0) >= minimumScore);
+  const scores = rankings.map(r => r.weightedMatchScore ?? r.overallScore ?? 0);
+  const shortlisted = rankings.filter(r => (r.weightedMatchScore ?? r.overallScore ?? 0) >= minimumScore);
 
   return {
     totalCandidates:      rankings.length + failures.length,

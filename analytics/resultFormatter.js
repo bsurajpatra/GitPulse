@@ -57,6 +57,10 @@ export function formatAnalysisResult(matchResult) {
 
   return {
     overallScore: score,
+    weightedMatchScore: matchResult.weightedMatchScore ?? score,
+    flatScore: matchResult.flatScore ?? score,
+    skillBreakdown: matchResult.skillBreakdown || [],
+    explanations: matchResult.explanations || [],
     matchedSkills: matched,
     missingSkills: missing,
     strengths,

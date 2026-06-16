@@ -10,15 +10,19 @@
  *   1 — skill found in repo name / description / language (weaker signal)
  */
 
+import { calculateWeightedScore } from './weightedScoringEngine.js';
+
 /**
  * Calculates the job compatibility metrics based on job requirements and profile skills.
  *
  * @param {string[]} jdSkills          - Normalized skills required by the job.
  * @param {string[]} profileSkills     - All normalized skills found in the profile (any source).
  * @param {Object}  [weightMap={}]     - Map of skill → weight (3/2/1). Built by profileSkillExtractor.
- * @returns {Object} score, matched, missing, profileOnly, weightedScore
+ * @param {string}  [jdText='']        - Optional raw job description text.
+ * @param {Object}  [evidenceMap={}]   - Optional evidence mapping from the Evidence Engine.
+ * @returns {Object} score, matched, missing, profileOnly, weightedMatchScore, skillBreakdown, explanations
  */
-export function calculateMatchScore(jdSkills, profileSkills, weightMap = {}) {
+export function calculateMatchScore(jdSkills, profileSkills, weightMap = {}, jdText = '', evidenceMap = {}) {
   const cleanJdSkills   = Array.isArray(jdSkills)      ? jdSkills      : [];
   const cleanProfile    = Array.isArray(profileSkills)  ? profileSkills : [];
 
@@ -43,7 +47,6 @@ export function calculateMatchScore(jdSkills, profileSkills, weightMap = {}) {
   const flatScore = Math.round((matched.length / cleanJdSkills.length) * 100);
 
   // ── Weighted score ───────────────────────────────────────────────────────
-  // Max possible weight for each JD skill is 3 (dep-file evidence).
   const MAX_WEIGHT = 3;
   let totalWeightEarned = 0;
   let totalWeightPossible = cleanJdSkills.length * MAX_WEIGHT;
@@ -57,10 +60,9 @@ export function calculateMatchScore(jdSkills, profileSkills, weightMap = {}) {
     ? Math.round((totalWeightEarned / totalWeightPossible) * 100)
     : 0;
 
-  // Blend: 60 % weighted + 40 % flat → stays intuitive while rewarding evidence
   const score = Math.round(weightedScore * 0.6 + flatScore * 0.4);
 
-  return {
+  const baseResult = {
     score,
     flatScore,
     weightedScore,
@@ -68,4 +70,16 @@ export function calculateMatchScore(jdSkills, profileSkills, weightMap = {}) {
     missing: missing.sort(),
     profileOnly: profileOnly.sort()
   };
+
+  if (jdText) {
+    const weightedEngineResult = calculateWeightedScore(jdText, cleanJdSkills, cleanProfile, evidenceMap);
+    return {
+      ...baseResult,
+      weightedMatchScore: weightedEngineResult.weightedScore,
+      skillBreakdown: weightedEngineResult.skillBreakdown,
+      explanations: weightedEngineResult.explanations
+    };
+  }
+
+  return baseResult;
 }

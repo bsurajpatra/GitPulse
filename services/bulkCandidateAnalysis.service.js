@@ -93,7 +93,7 @@ class BulkCandidateAnalysisService {
 
     // Apply minimum score filter for primary rankings list
     const rankings = minimumScore > 0
-      ? allRankings.filter(r => (r.overallScore || 0) >= minimumScore)
+      ? allRankings.filter(r => (r.weightedMatchScore ?? r.overallScore ?? 0) >= minimumScore)
       : allRankings;
 
     return { rankings, allRankings, statistics, failures };

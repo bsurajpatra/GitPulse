@@ -21,7 +21,7 @@ const tierTextColors = {
   low:       '#c8401a',
 };
 
-const MatchScoreCard = ({ score, role, experience, matchedCount, missingCount, totalJdSkills }) => {
+const MatchScoreCard = ({ score, flatScore, role, experience, matchedCount, missingCount, totalJdSkills }) => {
   const { tier, label } = getScoreTier(score);
   const barColor = tierBarColors[tier];
   const textColor = tierTextColors[tier];
@@ -35,9 +35,14 @@ const MatchScoreCard = ({ score, role, experience, matchedCount, missingCount, t
             {score}<span className="score-pct" style={{ color: textColor }}>%</span>
           </div>
           <div className="score-sublabel">Match Score</div>
+          {flatScore !== undefined && flatScore !== null && flatScore !== score && (
+            <div className="score-sublabel-flat" style={{ fontSize: '0.73rem', color: 'var(--text-muted-on-dark)', opacity: 0.85, marginTop: '0.25rem', fontWeight: 600 }}>
+              Flat Coverage: {flatScore}%
+            </div>
+          )}
 
           {/* Progress bar */}
-          <div className="score-bar-wrap" style={{ marginTop: '1rem', width: '100px' }}>
+          <div className="score-bar-wrap" style={{ marginTop: '0.75rem', width: '100px' }}>
             <div
               className="score-bar-fill"
               style={{

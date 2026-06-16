@@ -66,7 +66,7 @@ function BulkReportCard({ report, onReopen, onDelete }) {
 
 // ─── Single Report Card ──────────────────────────────────────────────────────
 function SingleReportCard({ report, onReopen, onDelete }) {
-  const score = report.result?.overallScore ?? 0;
+  const score = report.result?.weightedMatchScore ?? report.result?.overallScore ?? 0;
   return (
     <div className="report-card">
       <div className="report-card-body">

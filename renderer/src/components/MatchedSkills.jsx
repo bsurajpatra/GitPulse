@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { CheckCircle2, ChevronDown, ChevronUp, Database } from 'lucide-react';
 
-const MatchedSkills = ({ skills, evidenceMap = {} }) => {
+const MatchedSkills = ({ skills = [], evidenceMap = {}, skillBreakdown = [] }) => {
   const [expandedSkill, setExpandedSkill] = useState(null);
 
   const toggleExpand = (skill) => {
@@ -19,19 +19,40 @@ const MatchedSkills = ({ skills, evidenceMap = {} }) => {
     return 'var(--danger-text)';
   };
 
+  const getWeightTier = (weight) => {
+    if (weight >= 15) return { label: 'High', color: '#ef4444' };
+    if (weight >= 10) return { label: 'Med', color: '#fbbf24' };
+    return { label: 'Low', color: '#94a3b8' };
+  };
+
+  // Compile matched skills with breakdown info
+  const matchedList = skillBreakdown.length > 0
+    ? skillBreakdown.filter(item => item.status === 'matched')
+    : skills.map(skill => {
+        const skillData = evidenceMap?.[skill] || { confidence: 0, evidence: [] };
+        return {
+          skill,
+          weight: null,
+          confidence: skillData.confidence,
+          contribution: null
+        };
+      });
+
   return (
     <div className="result-card">
       <div className="result-card-header">
         <CheckCircle2 size={16} style={{ color: 'var(--success-text)' }} />
         <span className="result-card-title">Matched Skills</span>
-        <span className="result-card-count">{skills?.length || 0}</span>
+        <span className="result-card-count">{matchedList.length}</span>
       </div>
-      {skills && skills.length > 0 ? (
+      {matchedList.length > 0 ? (
         <div className="skills-evidence-list">
-          {skills.map((skill, i) => {
-            const skillData = evidenceMap?.[skill] || { confidence: 0, evidence: [] };
+          {matchedList.map((item, i) => {
+            const skill = item.skill;
+            const skillData = evidenceMap?.[skill] || { confidence: item.confidence || 0, evidence: [] };
             const isExpanded = expandedSkill === skill;
             const hasEvidence = skillData.evidence && skillData.evidence.length > 0;
+            const weightInfo = item.weight !== null ? getWeightTier(item.weight) : null;
 
             return (
               <div key={i} className="skill-evidence-item">
@@ -41,15 +62,46 @@ const MatchedSkills = ({ skills, evidenceMap = {} }) => {
                   title="Click to view evidence"
                   type="button"
                 >
-                  <div className="skill-trigger-left">
+                  <div className="skill-trigger-left" style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '0.4rem' }}>
                     <span className="skill-pill-icon-matched">✓</span>
-                    <span className="skill-trigger-name">{skill}</span>
+                    <span className="skill-trigger-name" style={{ fontWeight: 600 }}>{skill}</span>
+                    {weightInfo && (
+                      <span className="skill-weight-badge" style={{
+                        borderColor: weightInfo.color,
+                        color: weightInfo.color,
+                        borderWidth: '1px',
+                        borderStyle: 'solid',
+                        padding: '1px 5px',
+                        borderRadius: '3px',
+                        fontSize: '0.65rem',
+                        fontWeight: 600,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.02em',
+                        display: 'inline-flex',
+                        alignItems: 'center'
+                      }}>
+                        {weightInfo.label}
+                      </span>
+                    )}
                   </div>
-                  <div className="skill-trigger-right">
+                  <div className="skill-trigger-right" style={{ display: 'flex', alignItems: 'center' }}>
+                    {item.contribution !== null && (
+                      <span className="skill-contribution-badge" style={{
+                        background: 'rgba(34, 197, 94, 0.15)',
+                        color: 'var(--success-text)',
+                        padding: '2px 6px',
+                        borderRadius: '4px',
+                        fontSize: '0.7rem',
+                        fontWeight: 'bold',
+                        marginRight: '0.5rem'
+                      }}>
+                        +{item.contribution}% fit
+                      </span>
+                    )}
                     {skillData.confidence > 0 && (
                       <span
                         className="skill-confidence-badge"
-                        style={{ color: getConfidenceColor(skillData.confidence) }}
+                        style={{ color: getConfidenceColor(skillData.confidence), marginRight: '0.5rem' }}
                       >
                         {skillData.confidence}% Conf.
                       </span>
