@@ -22,6 +22,12 @@
 - **Score Justification & Explanations** — Compiles detailed fit and gap explanations (e.g. *Strong React evidence (+23% fit contribution)* or *Missing critical skill: AWS*).
 - **Subdirectory Scanning (MERN & Monorepos)** — Recursively scans directories (like `client`, `server`, `frontend`, `packages`) for packages, Dockerfiles, and test setups, making evaluation accurate for complex production-grade projects.
 - **Bulk Candidate Screening** — Screen lists of GitHub profiles in parallel, displaying a sortable comparison table containing Rank, Candidate, Job Fit, Quality, and Final Score metrics.
+- **Candidate Comparison Engine** — Select candidates from screening runs for interactive side-by-side comparison, analyzing shared core skills, candidate-specific unique skills, confidence signal strengths, and engineering hygiene grids.
+- **Offline PDF Report Exports** — Export professional, recruiter-ready evaluation sheets completely offline:
+  - **Candidate Report**: Full profile compatible metrics, missing gap signals, and recruiter recommendations.
+  - **Screening Summary**: Detailed ranks list, overall pool stats, and recommendations highlight card.
+  - **Comparison Sheet**: Dynamic side-by-side comparative matrices.
+- **High-Density Scaling** — Fluid screen grids that auto-wrap card rows and simplify headers for clean, overflow-free comparison dashboards (supporting up to 29+ profiles simultaneously) with custom-styled horizontal scrollbars.
 - **Reports History Directory** — Persists local reports with search filters, reopening, and secure double-confirmation delete modals.
 - **Onboarding Welcome Dashboard** — Premium welcome hero panel guiding new users through screening options.
 - **Dual Themes (Dark & Light Mode)** — Seamless toggle between the premium High-Contrast Dark UI and a soft cream Light Mode.
@@ -64,6 +70,7 @@ GitHub Username(s) + Job Description
 | **GitHub Client** | @octokit/rest (REST endpoints + GraphQL calendar queries) |
 | **Concurrency** | Worker Threads (CPU offloading), `p-limit` (parallel API throttling) |
 | **Storage & Cache** | electron-store (local JSON store), local memory TTL cache |
+| **PDF Generation** | PDFKit (offline vector layout engine) |
 
 ---
 
@@ -125,6 +132,7 @@ GitMatch/
 │   │   │   ├── Dashboard.jsx    # Hero dashboard onboarding
 │   │   │   ├── Home.jsx         # Single Candidate form (aligned layout)
 │   │   │   ├── BulkScreening.jsx# Multi-profile list screening
+│   │   │   ├── CandidateComparison.jsx # Side-by-side candidate comparison dashboard
 │   │   │   ├── Reports.jsx      # Historical reports list & delete modal
 │   │   │   ├── Results.jsx      # Three-column scorecard & quality breakdown
 │   │   │   └── Settings.jsx     # Config, token storage, and theme switcher
@@ -149,7 +157,13 @@ GitMatch/
 ├── services/
 │   ├── github.service.js        # Octokit API client wrapper (REST & GraphQL)
 │   ├── analysis.service.js      # Fetching, subdirectory scanning & cache coordination
-│   └── bulkCandidateAnalysis.js # Concurrency-controlled bulk analysis orchestrator
+│   ├── bulkCandidateAnalysis.js # Concurrency-controlled bulk analysis orchestrator
+│   └── pdfReportService.js      # Offline-ready PDF document coordinator and streamer
+├── utils/
+│   └── pdfTemplates/
+│       ├── candidateReport.js   # Single Candidate Evaluation PDF template
+│       ├── screeningReport.js   # Bulk Candidate Screening Report PDF template
+│       └── comparisonReport.js  # Candidate Comparison Report PDF template
 ├── server/
 │   └── index.js                 # Express OAuth token server
 └── store/

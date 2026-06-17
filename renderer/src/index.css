@@ -1109,11 +1109,13 @@ img { display: block; max-width: 100%; }
 .bulk-score-input::-webkit-outer-spin-button,
 .bulk-score-input::-webkit-inner-spin-button {
   -webkit-appearance: none;
+  appearance: none;
   margin: 0;
 }
 
 .bulk-score-input {
   -moz-appearance: textfield; /* Firefox */
+  appearance: textfield;
   width: 80px !important;
   text-align: center;
   font-weight: 700;
