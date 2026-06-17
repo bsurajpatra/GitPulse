@@ -8,8 +8,8 @@ import {
 const NAV_ITEMS = [
   { icon: LayoutDashboard, label: 'Dashboard',        to: '/',          match: ['/'] },
   { icon: User,            label: 'Single Candidate', to: '/candidate', match: ['/candidate', '/results'] },
-  { icon: Users,           label: 'Bulk Screening',   to: '/bulk',      match: ['/bulk', '/results'] },
-  { icon: FileText,        label: 'Reports',          to: '/reports',   match: ['/reports', '/results'] },
+  { icon: Users,           label: 'Bulk Screening',   to: '/bulk',      match: ['/bulk', '/results', '/compare'] },
+  { icon: FileText,        label: 'Reports',          to: '/reports',   match: ['/reports', '/results', '/compare'] },
 ];
 
 function NavItem({ icon: Icon, label, to, match, active, onClick }) {
@@ -33,6 +33,15 @@ export default function Sidebar({ userData, onLogout }) {
   const isActive = (item) => {
     const pathMatches = item.match.some(m => location.pathname === m);
     if (!pathMatches) return false;
+
+    // Special routing highlight for comparison page
+    if (location.pathname === '/compare') {
+      const isBackToReports = location.state?.backToReports;
+      if (isBackToReports) {
+        return item.to === '/reports';
+      }
+      return item.to === '/bulk';
+    }
 
     // Special routing highlight for results page
     if (location.pathname === '/results') {

@@ -67,4 +67,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   setPreferences: async (prefs) => {
     return await ipcRenderer.invoke('set-preferences', prefs);
   },
+  compareCandidates: async (payload) => {
+    return await ipcRenderer.invoke('compare-candidates', payload);
+  },
 });

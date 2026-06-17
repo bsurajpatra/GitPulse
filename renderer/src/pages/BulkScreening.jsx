@@ -70,6 +70,7 @@ const BulkScreening = ({ onSaveReport }) => {
   const [results, setResults] = useState(null);
   const [errors, setErrors] = useState({});
   const [apiError, setApiError] = useState(null);
+  const [selectedUsernames, setSelectedUsernames] = useState([]);
 
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
@@ -209,8 +210,29 @@ const BulkScreening = ({ onSaveReport }) => {
     setUsernamesText('');
     setJobDescription('');
     setMinimumScore(70);
+    setSelectedUsernames([]);
     // Clear router state to prevent loop reopening
     navigate('/bulk', { replace: true, state: {} });
+  };
+
+  const handleCompare = () => {
+    const selectedCandidates = results.allRankings.filter(c =>
+      selectedUsernames.includes(c.username)
+    );
+    navigate('/compare', {
+      state: {
+        candidates: selectedCandidates,
+        jobDescription: jobDescription,
+        bulkBackState: results ? {
+          stats: results.statistics,
+          allRankings: results.allRankings,
+          failures: results.failures,
+          jobDescription,
+          minimumScore,
+          name: screeningName,
+        } : null
+      }
+    });
   };
 
   const usernameCount = getCleanUsernames().length;
@@ -338,9 +360,17 @@ const BulkScreening = ({ onSaveReport }) => {
                     type="number"
                     className="form-input bulk-score-input"
                     value={minimumScore}
-                    onChange={(e) =>
-                      setMinimumScore(Math.max(0, Math.min(100, Number(e.target.value))))
-                    }
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === '') {
+                        setMinimumScore('');
+                      } else {
+                        const num = Number(val);
+                        if (!isNaN(num)) {
+                          setMinimumScore(Math.max(0, Math.min(100, num)));
+                        }
+                      }
+                    }}
                     min="0"
                     max="100"
                   />
@@ -379,22 +409,80 @@ const BulkScreening = ({ onSaveReport }) => {
           </div>
         )}
 
-        {/* ── Progress Bar ─────────────────────────────────────────────── */}
+        {/* ── Progress Modal Overlay ─────────────────────────────────────── */}
         {analyzing && progress && (
-          <div className="bulk-progress-wrap">
-            <div className="bulk-progress-header">
-              <span className="bulk-progress-label">Analyzing candidates…</span>
-              <span className="bulk-progress-count">
-                {progress.completed} / {progress.total}
-              </span>
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.8)',
+            backdropFilter: 'blur(5px)',
+            zIndex: 2000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            animation: 'fadeIn 0.25s ease'
+          }}>
+            <div style={{
+              background: 'var(--bg-dark-2)',
+              border: '1px solid var(--border-dark-strong)',
+              padding: '2.5rem',
+              borderRadius: 'var(--radius-md)',
+              width: '90%',
+              maxWidth: '460px',
+              boxShadow: '0 20px 50px rgba(0,0,0,0.6)',
+              animation: 'scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+              textAlign: 'center'
+            }}>
+              {/* Spinner */}
+              <div className="loading-spinner" style={{ margin: '0 auto 1.5rem', width: '38px', height: '38px' }} />
+              
+              <h2 style={{
+                fontFamily: 'var(--font-display)',
+                fontSize: '1.4rem',
+                fontWeight: 900,
+                textTransform: 'uppercase',
+                letterSpacing: '0.02em',
+                color: 'var(--text-on-dark)',
+                marginBottom: '0.5rem'
+              }}>
+                Screening in Progress
+              </h2>
+              
+              <p style={{
+                fontSize: '0.82rem',
+                color: 'var(--text-muted-on-dark)',
+                marginBottom: '1.75rem'
+              }}>
+                Please keep this application open while we analyze repository signals
+              </p>
+
+              <div style={{
+                background: 'var(--bg-dark)',
+                border: '1px solid var(--border-dark-strong)',
+                borderRadius: 'var(--radius-sm)',
+                padding: '1.25rem',
+                textAlign: 'left'
+              }}>
+                <div className="bulk-progress-header" style={{ marginBottom: '0.6rem' }}>
+                  <span className="bulk-progress-label" style={{ fontSize: '0.78rem' }}>Analyzing candidates…</span>
+                  <span className="bulk-progress-count" style={{ fontSize: '0.9rem' }}>
+                    {progress.completed} / {progress.total}
+                  </span>
+                </div>
+                <div className="bulk-progress-track">
+                  <div
+                    className="bulk-progress-fill"
+                    style={{ width: `${progress.percentage}%` }}
+                  />
+                </div>
+                <div className="bulk-progress-pct" style={{ marginTop: '0.4rem', fontSize: '0.72rem' }}>
+                  {progress.percentage}% Completed
+                </div>
+              </div>
             </div>
-            <div className="bulk-progress-track">
-              <div
-                className="bulk-progress-fill"
-                style={{ width: `${progress.percentage}%` }}
-              />
-            </div>
-            <div className="bulk-progress-pct">{progress.percentage}%</div>
           </div>
         )}
 
@@ -453,13 +541,71 @@ const BulkScreening = ({ onSaveReport }) => {
             {/* Ranked Table */}
             {results.allRankings.length > 0 && (
               <div className="bulk-table-wrap">
-                <div className="bulk-table-title-row">
-                  <span className="bulk-table-title">Ranked Candidates</span>
-                  <span className="bulk-table-count">{results.allRankings.length} total</span>
+                <div className="bulk-table-title-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <span className="bulk-table-title">Ranked Candidates</span>
+                    <span className="bulk-table-count">({results.allRankings.length} total)</span>
+                    <span style={{
+                      fontSize: '0.72rem',
+                      color: 'var(--text-muted-on-dark)',
+                      marginLeft: '0.5rem',
+                      fontWeight: 'normal',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.35rem',
+                      verticalAlign: 'middle'
+                    }}>
+                      <Users size={12} style={{ color: 'var(--accent)' }} />
+                      Select checkboxes to compare profiles side-by-side
+                    </span>
+                  </div>
+                  {selectedUsernames.length >= 2 && (
+                    <button
+                      className="btn-compare-action"
+                      onClick={handleCompare}
+                      style={{
+                        background: 'var(--accent)',
+                        color: '#fff',
+                        padding: '0.45rem 1rem',
+                        borderRadius: 'var(--radius-sm)',
+                        fontSize: '0.75rem',
+                        fontWeight: 800,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.04em',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.4rem',
+                        transition: 'var(--trans)',
+                        border: 'none',
+                        cursor: 'pointer'
+                      }}
+                      id="btn-compare-selected"
+                    >
+                      <Users size={12} /> Compare {selectedUsernames.length} Candidates
+                    </button>
+                  )}
                 </div>
-                <table className="bulk-table">
+                <table className="bulk-table bulk-screening-table">
                   <thead>
                     <tr>
+                      <th>
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', justifyContent: 'center', verticalAlign: 'middle' }}>
+                          <input
+                            type="checkbox"
+                            checked={selectedUsernames.length === results.allRankings.length && results.allRankings.length > 0}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedUsernames(results.allRankings.map(c => c.username));
+                              } else {
+                                setSelectedUsernames([]);
+                              }
+                            }}
+                            style={{ cursor: 'pointer', margin: 0, padding: 0 }}
+                            title="Select all for comparison"
+                          />
+                          <span style={{ fontSize: '0.68rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted-on-dark)' }}>Compare</span>
+                        </div>
+                      </th>
                       <th>Rank</th>
                       <th>Candidate</th>
                       <th>Job Fit</th>
@@ -474,16 +620,39 @@ const BulkScreening = ({ onSaveReport }) => {
                       const jobFitScore = candidate.weightedMatchScore ?? candidate.overallScore ?? 0;
                       const qualityScore = candidate.quality?.qualityScore ?? 0;
                       const finalScore = candidate.finalScore ?? Math.round(0.7 * jobFitScore + 0.3 * qualityScore);
-                      const isShortlisted = finalScore >= minimumScore;
+                      const isShortlisted = finalScore >= Number(minimumScore || 0);
                       const finalColor = getScoreColor(finalScore);
                       const jobFitColor = getScoreColor(jobFitScore);
                       const qualityColor = getScoreColor(qualityScore);
+                      const isSelected = selectedUsernames.includes(candidate.username);
 
                       return (
                         <tr
                           key={candidate.username}
-                          className={isShortlisted ? '' : 'row-below-threshold'}
+                          className={`${isShortlisted ? '' : 'row-below-threshold'}`}
+                          style={{
+                            background: isSelected ? 'rgba(200, 64, 26, 0.05)' : undefined,
+                            borderLeft: isSelected ? '3px solid var(--accent)' : undefined,
+                            transition: 'background 0.2s, border-left 0.2s'
+                          }}
                         >
+                          {/* Checkbox */}
+                          <td>
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => {
+                                setSelectedUsernames(prev =>
+                                  prev.includes(candidate.username)
+                                    ? prev.filter(u => u !== candidate.username)
+                                    : [...prev, candidate.username]
+                                );
+                              }}
+                              style={{ cursor: 'pointer', verticalAlign: 'middle' }}
+                              title={`Select @${candidate.username} to compare`}
+                            />
+                          </td>
+
                           {/* Rank */}
                           <td>
                             <span className={`rank-badge rank-${candidate.rank <= 3 ? candidate.rank : 'other'}`}>

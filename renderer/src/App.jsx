@@ -9,6 +9,7 @@ import Dashboard from './pages/Dashboard';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
 import BulkScreening from './pages/BulkScreening';
+import CandidateComparison from './pages/CandidateComparison';
 import GitHubService from '../../services/github.service.js';
 
 function App() {
@@ -290,6 +291,9 @@ function App() {
                 />
               }
             />
+
+            {/* Candidate Comparison Dashboard */}
+            <Route path="/compare" element={<CandidateComparison />} />
 
             {/* Reports History */}
             <Route

@@ -14,6 +14,7 @@ import oauthServer from '../server/index.js';
 import GitHubService from '../services/github.service.js';
 import AnalysisService from '../services/analysis.service.js';
 import BulkCandidateAnalysisService from '../services/bulkCandidateAnalysis.service.js';
+import { compareCandidates } from '../analytics/candidateComparisonEngine.js';
 import { Worker } from 'worker_threads';
 import { getCachedData, setCachedData, clearExpiredCache, clearAllCache } from '../store/cacheStore.js';
 
@@ -155,6 +156,17 @@ ipcMain.handle('evaluate-candidates-bulk', async (event, { usernames, jobDescrip
     return { success: true, data: result };
   } catch (error) {
     console.error('Bulk Analysis Error:', error);
+    return { success: false, error: error.message };
+  }
+});
+
+// Candidate Comparison Handler
+ipcMain.handle('compare-candidates', async (event, { jobDescription, candidates }) => {
+  try {
+    const result = compareCandidates({ jobDescription, candidates });
+    return { success: true, data: result };
+  } catch (error) {
+    console.error('Comparison Error:', error);
     return { success: false, error: error.message };
   }
 });

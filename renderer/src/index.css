@@ -693,7 +693,6 @@ img { display: block; max-width: 100%; }
 .results-wrapper {
   max-width: 1000px;
   margin: 0 auto;
-  padding: 2rem 2.5rem;
 }
 
 .results-top-bar {
@@ -942,10 +941,6 @@ img { display: block; max-width: 100%; }
 /* Bulk Screening Page                          */
 /* ============================================ */
 .bulk-page {
-  flex: 1;
-  background: var(--bg-dark);
-  padding: 2rem 2.5rem;
-  overflow-y: auto;
   animation: fadeIn 0.35s ease-out;
 }
 
@@ -1079,7 +1074,14 @@ img { display: block; max-width: 100%; }
   gap: 0.4rem;
 }
 
+.bulk-score-input::-webkit-outer-spin-button,
+.bulk-score-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 .bulk-score-input {
+  -moz-appearance: textfield; /* Firefox */
   width: 80px !important;
   text-align: center;
   font-weight: 700;
@@ -1267,7 +1269,8 @@ img { display: block; max-width: 100%; }
 .bulk-table-wrap {
   border: 1px solid var(--border-dark);
   border-radius: var(--radius-sm);
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
   margin-bottom: 1.5rem;
 }
 
@@ -1312,6 +1315,7 @@ img { display: block; max-width: 100%; }
   color: var(--text-muted-on-dark);
   text-align: left;
   background: var(--bg-dark-2);
+  white-space: nowrap;
 }
 
 .bulk-table td {
@@ -1320,6 +1324,68 @@ img { display: block; max-width: 100%; }
   color: var(--text-on-dark);
   border-bottom: 1px solid var(--border-dark);
   vertical-align: middle;
+}
+
+/* Specific column layouts for Bulk Screening candidates list */
+.bulk-screening-table th,
+.bulk-screening-table td {
+  box-sizing: border-box;
+}
+
+/* 1st Column: Compare Checkbox */
+.bulk-screening-table th:nth-child(1),
+.bulk-screening-table td:nth-child(1) {
+  width: 90px;
+  text-align: center;
+}
+
+/* 2nd Column: Rank Badge */
+.bulk-screening-table th:nth-child(2),
+.bulk-screening-table td:nth-child(2) {
+  width: 60px;
+  text-align: center;
+}
+
+/* 3rd Column: Candidate Avatar & Names */
+.bulk-screening-table th:nth-child(3),
+.bulk-screening-table td:nth-child(3) {
+  min-width: 160px;
+  text-align: left;
+}
+
+/* 4th Column: Job Fit Score % */
+.bulk-screening-table th:nth-child(4),
+.bulk-screening-table td:nth-child(4) {
+  width: 80px;
+  text-align: left;
+}
+
+/* 5th Column: Quality Score % */
+.bulk-screening-table th:nth-child(5),
+.bulk-screening-table td:nth-child(5) {
+  width: 80px;
+  text-align: left;
+}
+
+/* 6th Column: Final Score Meter & Tier */
+.bulk-screening-table th:nth-child(6),
+.bulk-screening-table td:nth-child(6) {
+  min-width: 150px;
+  text-align: left;
+}
+
+/* 7th Column: Status Tag */
+.bulk-screening-table th:nth-child(7),
+.bulk-screening-table td:nth-child(7) {
+  width: 125px;
+  text-align: left;
+}
+
+/* 8th Column: Action Button */
+.bulk-screening-table th:nth-child(8),
+.bulk-screening-table td:nth-child(8) {
+  width: 130px;
+  text-align: right;
 }
 
 .bulk-table tbody tr:last-child td { border-bottom: none; }
@@ -1425,6 +1491,7 @@ img { display: block; max-width: 100%; }
   text-transform: uppercase;
   padding: 0.25rem 0.6rem;
   border-radius: 2px;
+  white-space: nowrap;
 }
 
 .status-shortlisted {
@@ -1507,7 +1574,6 @@ img { display: block; max-width: 100%; }
   .bulk-stats-grid   { grid-template-columns: repeat(3, 1fr); }
   .bulk-controls     { flex-direction: column; }
   .bulk-min-score-group { width: 100%; }
-  .bulk-page         { padding: 1.5rem 1.25rem; }
 }
 
 @media (max-width: 680px) {
